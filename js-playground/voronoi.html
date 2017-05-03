@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Gaia Demo</title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script src="src/apq.js"></script>
+<script src="src/rbtree.js"></script>
+<script src="src/skiplist.js"></script>
+<script src="src/mt-prng.js"></script>
+<script src="src/globe.js"></script>
+<script src="src/voronoi.js"></script>
+<script>
+  var canvas = document.getElementById('canvas');
+  canvas.width = 1000;
+  canvas.height = 1000;
+
+  var ctx = canvas.getContext('2d');
+
+  var rng = new MersenneTwister(130);
+  var globe = new Globe(rng, 100000.0, 120);
+
+  //globe.tiles.push(new GeoTile(null, new GeoPoint(null, 0.0, 0.0)));
+  //globe.tiles.push(new GeoTile(null, new GeoPoint(null, Math.PI * 0.25, 0.4)));
+  //globe.tiles.push(new GeoTile(null, new GeoPoint(null, Math.PI * 0.5, 0.8)));
+  globe.voronoi('anim');
+
+  // Render Globe
+
+  var angle = 0.0;
+
+  (function() {
+    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+  })();
+
+  var start = window.mozAnimationStartTime || null;
+  var prevTime = null;
+  function step(timestamp) {
+    if (start === null) {
+      start = timestamp;
+    }
+    var time = timestamp - start;
+    if (!prevTime) {
+      prevTime = time;
+    }
+    if (!down) {
+      angle -= (time - prevTime) * 0.0003;
+      prevTime = time;
+    }
+
+    //angle = -time * 0.0003;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    globe.render(ctx, canvas.width / 2.0, canvas.height / 2.0, Math.min(canvas.width, canvas.height) / 2.0 - 20.0, angle);
+
+    requestAnimationFrame(step);
+  }
+
+  var down;
+  var st;
+  canvas.onmousedown = function(e) {
+    down = e;
+    st = angle;
+  }
+  canvas.onmousemove = function(e) {
+    if (down) {
+      angle = st + (down.clientX - e.clientX) * 0.03;
+    }
+  }
+  canvas.onmouseup = function(e) {
+    down = false;
+    prevTime = null;
+  }
+
+  requestAnimationFrame(step);
+</script>
+</body>
+</html>

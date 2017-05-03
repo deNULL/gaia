@@ -1,0 +1,9 @@
+[package]
+name = "Gaia"
+version = "0.1.0"
+authors = ["Denis Olshin <me@denull.ru>"]
+
+[dependencies]
+glium = "0.16.0"
+image = "*"
+rand = "0.3"

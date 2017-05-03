@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Gaia Demo</title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script src="src/apq.js"></script>
+<script src="src/mt-prng.js"></script>
+<script src="src/globe.js"></script>
+<script src="src/subdivide.js"></script>
+<script>
+  var canvas = document.getElementById('canvas');
+  canvas.width = 1000;
+  canvas.height = 1000;
+
+  var ctx = canvas.getContext('2d');
+
+  var rng = new MersenneTwister();
+  var globe = new Globe(rng, 100000.0, 100);
+  globe.octagon();
+  globe.subdivide(0.4 * Math.PI / 5, 6, true, true, 0);
+  globe.flood();
+  globe.subdivide(0.02 * Math.PI / 5, 6, true, false, 0.2);
+
+  // Render Globe
+
+  var angle = 0.0;
+
+  (function() {
+    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+  })();
+
+  var start = window.mozAnimationStartTime || null;
+  function step(timestamp) {
+    if (start === null) {
+      start = timestamp;
+    }
+    var time = timestamp - start;
+
+    angle = time * 0.0003;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    globe.render(ctx, canvas.width / 2.0, canvas.height / 2.0, Math.min(canvas.width, canvas.height) / 2.0 - 20.0, angle);
+
+    requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+</script>
+</body>
+</html>
